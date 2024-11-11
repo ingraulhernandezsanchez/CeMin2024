@@ -1,0 +1,163 @@
+﻿@page "/login"
+@page "/"
+@using System.ComponentModel.DataAnnotations
+@using CeMin2024.Domain.Models
+@using CeMin2024.Client.Services
+@using CeMin2024.Application.Interfaces
+@inject HttpClient Http
+@inject IAuthService AuthService
+@inject IRoleService RoleService
+@inject IConfigurationService ConfigService
+@inject NavigationManager NavigationManager
+@inject ILogger<Login> Logger
+
+<div class="govco-page">
+    <header class="govco-header">
+        <div class="govco-header-logo">
+            <img src="_content/YourApp.Client/images/logo.png" alt="Logo CEMIN" class="govco-logo" />
+        </div>
+    </header>
+
+    <main class="govco-main">
+        <div class="govco-container">
+            <div class="govco-card">
+                <h2 class="govco-card-title">Sistema CEMIN</h2>
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="govco-alert govco-alert-error" role="alert">
+                        <i class="material-icons govco-icon">error</i>
+                        <span>@errorMessage</span>
+                        <div class="govco-alert-details">
+                            @detailedErrorMessage
+                        </div>
+                    </div>
+                }
+
+                @if (!isLoading)
+                {
+                    <EditForm Model="@loginModel" OnValidSubmit="HandleLogin" class="govco-form">
+                        <DataAnnotationsValidator />
+
+                        <div class="govco-form-group">
+                            <label for="username" class="govco-label">Usuario</label>
+                            <InputText id="username" @bind-Value="loginModel.Username" class="govco-input" />
+                        </div>
+
+                        <div class="govco-form-group">
+                            <label for="password" class="govco-label">Contraseña</label>
+                            <InputText type="password" id="password" @bind-Value="loginModel.Password" class="govco-input" />
+                        </div>
+
+                        <div class="govco-form-group">
+                            <label for="role" class="govco-label">Rol</label>
+                            <InputSelect id="role" @bind-Value="loginModel.SelectedRole" class="govco-select">
+                                <option value="">Seleccione un rol...</option>
+                                @foreach (var role in roles)
+                                {
+                                    <option value="@role.Nombre">@role.Nombre</option>
+                                }
+                            </InputSelect>
+                        </div>
+
+                        <button type="submit" class="govco-button govco-button-primary">
+                            Iniciar Sesión
+                        </button>
+                    </EditForm>
+                }
+            </div>
+        </div>
+    </main>
+
+    <footer class="govco-footer">
+        <div class="govco-footer-content">
+            <p>© @DateTime.Now.Year CEMIN - Todos los derechos reservados</p>
+        </div>
+    </footer>
+</div>
+
+@code {
+    private LoginModel loginModel = new();
+    private List<RoleModel> roles = new();
+    private string errorMessage = "";
+    private string detailedErrorMessage = "";
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Intenta cargar el nombre de la aplicación
+            try
+            {
+                var appName = await ConfigService.GetApplicationName();
+                detailedErrorMessage += "ConfigService OK. ";
+            }
+            catch (Exception ex)
+            {
+                detailedErrorMessage += $"ConfigService Error: {ex.Message}. ";
+                Logger.LogError(ex, "Error en ConfigService");
+            }
+
+            // Intenta cargar los roles
+            try
+            {
+                roles = await RoleService.GetRolesAsync();
+                detailedErrorMessage += "RoleService OK. Roles count: " + (roles?.Count ?? 0);
+            }
+            catch (Exception ex)
+            {
+                detailedErrorMessage += $"RoleService Error: {ex.Message}. ";
+                Logger.LogError(ex, "Error en RoleService");
+                errorMessage = "Error al cargar los roles del sistema.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Error al cargar la página.";
+            detailedErrorMessage += $"Error general: {ex.Message}";
+            Logger.LogError(ex, "Error general en OnInitializedAsync");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleLogin()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = "";
+
+            if (string.IsNullOrEmpty(loginModel.SelectedRole))
+            {
+                errorMessage = "Por favor, seleccione un rol.";
+                return;
+            }
+
+            var result = await AuthService.LoginAsync(loginModel);
+            if (result)
+            {
+                NavigationManager.NavigateTo("/home", forceLoad: true);
+            }
+            else
+            {
+                errorMessage = "Credenciales inválidas.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Error durante el inicio de sesión.";
+            detailedErrorMessage = ex.Message;
+            Logger.LogError(ex, "Error en HandleLogin");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+}
