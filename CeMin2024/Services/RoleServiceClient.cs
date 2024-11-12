@@ -1,6 +1,9 @@
 ﻿using System.Net.Http.Json;
 using CeMin2024.Application.Interfaces;
 using CeMin2024.Domain.Models;
+using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CeMin2024.Client.Services
 {
@@ -15,7 +18,7 @@ namespace CeMin2024.Client.Services
             _logger = logger;
         }
 
-        public async Task<List<RoleModel>> GetRolesAsync()
+        public async Task<IEnumerable<RoleModel>> GetRolesAsync()
         {
             try
             {
@@ -47,7 +50,11 @@ namespace CeMin2024.Client.Services
             try
             {
                 var response = await _httpClient.GetAsync($"api/role/exists/{nombre}");
-                return response.IsSuccessStatusCode;
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<bool>();
+                }
+                return false;
             }
             catch (Exception ex)
             {

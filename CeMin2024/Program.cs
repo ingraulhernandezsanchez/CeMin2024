@@ -1,28 +1,16 @@
+using System.Net.Http;
 using CeMin2024.Client;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Microsoft.AspNetCore.Components.Authorization;
-using CeMin2024.Client.Services;
-using CeMin2024.Application.Interfaces;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-// Configurar HttpClient
+// Configura el HttpClient para apuntar a la API en el puerto 9000
 builder.Services.AddScoped(sp => new HttpClient
 {
-    BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+    BaseAddress = new Uri("http://localhost:44388")
 });
-
-// Servicios de autenticación
-builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
-builder.Services.AddOptions();
-builder.Services.AddAuthorizationCore();
-
-// Registrar servicios del cliente
-builder.Services.AddScoped<IAuthService, AuthServiceClient>();
-builder.Services.AddScoped<IRoleService, RoleServiceClient>();
-builder.Services.AddScoped<IConfigurationService, ConfigurationServiceClient>();
 
 await builder.Build().RunAsync();

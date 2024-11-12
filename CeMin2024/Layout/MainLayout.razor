@@ -1,3 +1,28 @@
 ﻿@inherits LayoutComponentBase
 
-@Body
+<div class="layout-container">
+    <!-- Barra superior -->
+    <Header />
+
+    <!-- Contenido principal -->
+    <main>
+        @Body
+    </main>
+
+    <!-- Pie de página -->
+    <Footer />
+</div>
+
+<style>
+    /* Aquí puedes incluir estilos específicos del layout */
+    .layout-container {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+    
+    main {
+        flex: 1;
+        padding: 20px;
+    }
+</style>

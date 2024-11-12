@@ -1,17 +1,8 @@
-﻿<CascadingAuthenticationState>
-    <Router AppAssembly="@typeof(App).Assembly">
-        <Found Context="routeData">
-            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
-                <NotAuthorized>
-                    <RedirectToLogin />
-                </NotAuthorized>
-            </AuthorizeRouteView>
-        </Found>
-        <NotFound>
-            <PageTitle>CEMIN Not found</PageTitle>
-            <LayoutView Layout="@typeof(MainLayout)">
-                <p>Lo sentimos, no hay nada en esta dirección.</p>
-            </LayoutView>
-        </NotFound>
-    </Router>
-</CascadingAuthenticationState>
+﻿<Router AppAssembly="@typeof(App).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="typeof(MainLayout)" />
+    </Found>
+    <NotFound>
+        <RedirectToLogin />
+    </NotFound>
+</Router>

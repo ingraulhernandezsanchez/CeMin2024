@@ -1,5 +1,7 @@
 ﻿using System.Net.Http.Json;
 using CeMin2024.Application.Interfaces;
+using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace CeMin2024.Client.Services
 {
@@ -14,7 +16,7 @@ namespace CeMin2024.Client.Services
             _logger = logger;
         }
 
-        public async Task<string> GetApplicationName()
+        public async Task<string> GetAppName()
         {
             try
             {
